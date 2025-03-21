@@ -3,6 +3,7 @@ import random
 import os
 from datetime import datetime
 from waitress import serve
+import json
 
 app = Flask(__name__)
 
@@ -26,13 +27,21 @@ def get_fortune(user_name):
     fortune = random.choice(list(fortune_levels.keys()))  # 固定當日運勢
     stars = fortune_levels[fortune]
 
-    return jsonify({
+    # 以正常格式返回JSON，確保不會轉義Unicode字符
+    result = {
         "user": user_name,
         "fortune": fortune,
         "stars": stars
-    })
+    }
+
+    # 使用json.dumps來避免unicode轉義
+    return app.response_class(
+        response=json.dumps(result, ensure_ascii=False),
+        status=200,
+        mimetype='application/json'
+    )
 
 # 使用 waitress 啟動伺服器
 if __name__ == '__main__':
-    port = int(os.environ.get("PORT", 10000))  # Render 會提供 PORT 環境變數
+    port = int(os.environ.get("PORT", 5000))  # Render 會提供 PORT 環境變數
     serve(app, host='0.0.0.0', port=port)
