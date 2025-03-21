@@ -1,6 +1,7 @@
 from flask import Flask, jsonify
 import random
 import os
+from datetime import datetime
 from waitress import serve
 
 app = Flask(__name__)
@@ -19,7 +20,8 @@ fortune_levels = {
 @app.route('/fortune/<user_name>', methods=['GET'])
 def get_fortune(user_name):
     # 讓運勢與使用者名字 + 當天日期綁定，確保一天內的結果固定
-    seed = hash(user_name + os.environ.get("DATE", "2025-03-22"))  # 用當天日期作為種子
+    today_date = datetime.today().strftime('%Y-%m-%d')  # 取得今天的日期
+    seed = hash(user_name + today_date)  # 用當天日期作為種子
     random.seed(seed)  # 設定隨機種子，確保相同輸入產生相同結果
     fortune = random.choice(list(fortune_levels.keys()))  # 固定當日運勢
     stars = fortune_levels[fortune]
