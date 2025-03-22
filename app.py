@@ -29,7 +29,7 @@ def get_fortune(user_name):
 
     # 正確的格式化輸出
     result = {
-        "message": f"今天是 {today_date}，{user_name} 的運勢是 <{fortune}>：{fortune_text}"
+        "message": f"今天是 {today_date}， @{user_name} 的運勢是 <{fortune}>：{fortune_text}"
     }
 
     # 使用 json.dumps 來避免 Unicode 轉義
