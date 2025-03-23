@@ -30,14 +30,20 @@ def get_fortune():
     if queried_name is None:
         queried_name = user_name
 
-    # 讓運勢與使用者名字 + 當天日期綁定，確保一天內的結果固定
-    today_date = datetime.today().strftime('%Y-%m-%d')
-    seed = hash(queried_name + today_date)
-    random.seed(seed)
-    fortune = random.choice(list(fortune_levels.keys()))
-    fortune_text = fortune_levels[fortune]
+    # 檢查是否有包含關鍵字 "綠茶的"，若有則無條件回傳大凶
+    if "綠茶的" in queried_name:
+        fortune = "大凶"
+        fortune_text = fortune_levels[fortune]
+    else:
+        # 讓運勢與使用者名字 + 當天日期綁定，確保一天內的結果固定
+        today_date = datetime.today().strftime('%Y-%m-%d')
+        seed = hash(queried_name + today_date)
+        random.seed(seed)
+        fortune = random.choice(list(fortune_levels.keys()))
+        fortune_text = fortune_levels[fortune]
 
-    # 根據是否有提供查詢名字，調整訊息格式
+    # 讓運勢顯示結果
+    today_date = datetime.today().strftime('%Y-%m-%d')
     if queried_name == user_name:
         result_message = f"今天是 {today_date}， @{user_name} 的運勢是 <{fortune}>：{fortune_text}"
     else:
