@@ -20,19 +20,28 @@ fortune_levels = {
 
 @app.route('/fortune', methods=['GET'])
 def get_fortune():
-    # 取得指定的使用者名稱，若沒有則使用發訊者名稱
-    user_name = request.args.get('user', request.args.get('query', '未知使用者'))
+    # 取得發送者名稱（當沒有提供名稱時使用發送者的名稱）
+    user_name = request.args.get('user', '未知使用者')
+
+    # 取得想查詢的名字，若無則默認為發送者名稱
+    queried_name = request.args.get('name', user_name)
 
     # 讓運勢與使用者名字 + 當天日期綁定，確保一天內的結果固定
     today_date = datetime.today().strftime('%Y-%m-%d')
-    seed = hash(user_name + today_date)
+    seed = hash(queried_name + today_date)
     random.seed(seed)
     fortune = random.choice(list(fortune_levels.keys()))
     fortune_text = fortune_levels[fortune]
 
-    # 正確的格式化輸出
+    # 根據是否有指定名字，調整格式
+    if queried_name == user_name:
+        result_message = f"今天是 {today_date}， @{user_name} 的運勢是 <{fortune}>：{fortune_text}"
+    else:
+        result_message = f"今天是 {today_date}， @{user_name} '' {queried_name} '' 的運勢是 <{fortune}>：{fortune_text}"
+
+    # 格式化結果
     result = {
-        "message": f"今天是 {today_date}， @{user_name} 的運勢是 <{fortune}>：{fortune_text}"
+        "message": result_message
     }
 
     # 使用 json.dumps 來避免 Unicode 轉義
@@ -41,7 +50,6 @@ def get_fortune():
         status=200,
         mimetype='application/json'
     )
-
 
 # 使用 waitress 啟動伺服器
 if __name__ == '__main__':
