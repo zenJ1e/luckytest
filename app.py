@@ -28,6 +28,9 @@ def get_fortune():
     if not queried_name:
         queried_name = user_name  # 如果沒有提供名字，使用發送指令者的名字
 
+    # 包裹名字於「」符號
+    queried_name = f"「{queried_name}」"
+
     # 讓運勢與使用者名字 + 當天日期綁定，確保一天內的結果固定
     today_date = datetime.today().strftime('%Y-%m-%d')
     seed = hash(queried_name + today_date)
