@@ -27,9 +27,10 @@ def get_fortune():
     # 當沒有提供名字時，就顯示傳送訊息的人的名字
     if not queried_name:
         queried_name = user_name  # 如果沒有提供名字，使用發送指令者的名字
-
-    # 包裹名字於「」符號
-    queried_name = f"「{queried_name}」"
+        # 不加上「」符號，直接顯示名稱
+    else:
+        # 如果有指定名字，才加上「」符號
+        queried_name = f"「{queried_name}」"
 
     # 讓運勢與使用者名字 + 當天日期綁定，確保一天內的結果固定
     today_date = datetime.today().strftime('%Y-%m-%d')
