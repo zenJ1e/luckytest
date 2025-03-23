@@ -39,7 +39,10 @@ def get_fortune():
     fortune_text = fortune_levels[fortune]
 
     # 正確的格式化輸出（去掉多餘的 "message"）
-    result = f"今天是 {today_date}， @{user_name} {queried_name} 的運勢是 <{fortune}>：{fortune_text}"
+    if queried_name == user_name:
+        result = f"今天是 {today_date}， @{user_name} 的運勢是 <{fortune}>：{fortune_text}"
+    else:
+        result = f"今天是 {today_date}， @{user_name} {queried_name} 的運勢是 <{fortune}>：{fortune_text}"
 
     # 直接返回純文字
     return result
