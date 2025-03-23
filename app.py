@@ -44,5 +44,5 @@ def get_fortune():
 
 # 使用 waitress 啟動伺服器
 if __name__ == '__main__':
-    port = int(os.environ.get("PORT", 5000))  # Render 會提供 PORT 環境變數
+    port = int(os.environ.get("PORT", 10000))  # 使用 Render 指定的 PORT
     serve(app, host='0.0.0.0', port=port)
