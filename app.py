@@ -38,7 +38,7 @@ def get_fortune():
     fortune = random.choice(list(fortune_levels.keys()))
     fortune_text = fortune_levels[fortune]
 
-    # 正確的格式化輸出（去掉多餘的 "message"）
+    # 正確的格式化輸出（不會有多餘的"message"或重複顯示名字）
     if queried_name == user_name:
         result = f"今天是 {today_date}， @{user_name} 的運勢是 <{fortune}>：{fortune_text}"
     else:
