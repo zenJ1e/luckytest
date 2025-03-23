@@ -31,16 +31,10 @@ def get_fortune():
     fortune_text = fortune_levels[fortune]
 
     # 正確的格式化輸出
-    result = {
-        "message": f"今天是 {today_date}， @{user_name} 的運勢是 <{fortune}>：{fortune_text}"
-    }
+    result = f"今天是 {today_date}， @{user_name} 的運勢是 <{fortune}>：{fortune_text}"
 
-    # 使用 json.dumps 來避免 Unicode 轉義
-    return app.response_class(
-        response=json.dumps(result, ensure_ascii=False),
-        status=200,
-        mimetype='application/json'
-    )
+    # 直接返回訊息字串
+    return result
 
 # 使用 waitress 啟動伺服器
 if __name__ == '__main__':
