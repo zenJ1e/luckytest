@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request
 import random
 import os
 from datetime import datetime
@@ -43,17 +43,8 @@ def get_fortune():
     else:
         result_message = f"今天是 {today_date}， @{user_name} {queried_name} 的運勢是 <{fortune}>：{fortune_text}"
 
-    # 格式化結果並返回
-    result = {
-        "message": result_message
-    }
-
-    # 使用 json.dumps 來避免 Unicode 轉義
-    return app.response_class(
-        response=json.dumps(result, ensure_ascii=False),
-        status=200,
-        mimetype='application/json'
-    )
+    # 直接返回純文字訊息
+    return result_message
 
 # 使用 waitress 啟動伺服器
 if __name__ == '__main__':
