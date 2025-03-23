@@ -1,4 +1,4 @@
-from flask import Flask, jsonify
+from flask import Flask, request, jsonify
 import random
 import os
 from datetime import datetime
@@ -18,14 +18,17 @@ fortune_levels = {
     "大凶": "💀。完蛋辣，你頭要禿啦老哥  greenteaTTBB ，找時間去祭改一下順便買瓶落建(後果請見 @標大郎 頭貼)"
 }
 
-@app.route('/fortune/<user_name>', methods=['GET'])
-def get_fortune(user_name):
+@app.route('/fortune', methods=['GET'])
+def get_fortune():
+    # 從 Nightbot 取得發送者名稱（當沒有提供名稱時）
+    user_name = request.args.get('user', '未知使用者')
+
     # 讓運勢與使用者名字 + 當天日期綁定，確保一天內的結果固定
-    today_date = datetime.today().strftime('%Y-%m-%d')  # 取得今天的日期
-    seed = hash(user_name + today_date)  # 用當天日期作為種子
-    random.seed(seed)  # 設定隨機種子，確保相同輸入產生相同結果
-    fortune = random.choice(list(fortune_levels.keys()))  # 固定當日運勢
-    fortune_text = fortune_levels[fortune]  # 取出運勢的完整內容
+    today_date = datetime.today().strftime('%Y-%m-%d')
+    seed = hash(user_name + today_date)
+    random.seed(seed)
+    fortune = random.choice(list(fortune_levels.keys()))
+    fortune_text = fortune_levels[fortune]
 
     # 正確的格式化輸出
     result = {
