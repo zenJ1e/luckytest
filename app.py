@@ -24,11 +24,11 @@ def get_fortune():
     user_name = request.args.get('user', '未知使用者')
     queried_name = request.args.get('name', '').strip()  # 提取名字，並移除兩端的空格
 
-    # 當沒有提供名字時，就顯示傳送訊息的人的名字，且不加「」符號
+    # 如果沒有指定名字，則顯示發送者名稱，不加「」符號
     if not queried_name:
-        queried_name = user_name  # 如果沒有提供名字，使用發送指令者的名字
+        queried_name = user_name  # 使用發送指令者的名字
     else:
-        # 如果有指定名字，才加上「」符號
+        # 如果有提供名字，才加上「」符號
         queried_name = f"「{queried_name}」"
 
     # 讓運勢與使用者名字 + 當天日期綁定，確保一天內的結果固定
@@ -38,8 +38,8 @@ def get_fortune():
     fortune = random.choice(list(fortune_levels.keys()))
     fortune_text = fortune_levels[fortune]
 
-    # 正確的格式化輸出（不會有多餘的"message"或重複顯示名字）
-    if queried_name == user_name:
+    # 檢查傳送訊息的名稱與指定名稱是否一致，避免重複顯示名字
+    if queried_name == f"「{user_name}」":  # 如果查詢名字就是發送者的名字，則不加重複的名字
         result = f"今天是 {today_date}， @{user_name} 的運勢是 <{fortune}>：{fortune_text}"
     else:
         result = f"今天是 {today_date}， @{user_name} {queried_name} 的運勢是 <{fortune}>：{fortune_text}"
