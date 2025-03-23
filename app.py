@@ -20,8 +20,8 @@ fortune_levels = {
 
 @app.route('/fortune', methods=['GET'])
 def get_fortune():
-    # 從 Nightbot 取得發送者名稱（當沒有提供名稱時）
-    user_name = request.args.get('user', '未知使用者')
+    # 取得指定的使用者名稱，若沒有則使用發訊者名稱
+    user_name = request.args.get('user', request.args.get('query', '未知使用者'))
 
     # 讓運勢與使用者名字 + 當天日期綁定，確保一天內的結果固定
     today_date = datetime.today().strftime('%Y-%m-%d')
@@ -31,10 +31,17 @@ def get_fortune():
     fortune_text = fortune_levels[fortune]
 
     # 正確的格式化輸出
-    result = f"今天是 {today_date}， @{user_name} 的運勢是 <{fortune}>：{fortune_text}"
+    result = {
+        "message": f"今天是 {today_date}， @{user_name} 的運勢是 <{fortune}>：{fortune_text}"
+    }
 
-    # 直接返回訊息字串
-    return result
+    # 使用 json.dumps 來避免 Unicode 轉義
+    return app.response_class(
+        response=json.dumps(result, ensure_ascii=False),
+        status=200,
+        mimetype='application/json'
+    )
+
 
 # 使用 waitress 啟動伺服器
 if __name__ == '__main__':
