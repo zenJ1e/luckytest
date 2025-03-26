@@ -4,6 +4,7 @@ import os
 from datetime import datetime
 from waitress import serve
 import json
+import hashlib
 
 app = Flask(__name__)
 
@@ -37,7 +38,8 @@ def get_fortune():
     else:
         # 讓運勢與使用者名字 + 當天日期綁定，確保一天內的結果固定
         today_date = datetime.today().strftime('%Y-%m-%d')
-        seed = hash(queried_name + today_date)
+        seed_str = queried_name + today_date
+        seed = int(hashlib.md5(seed_str.encode()).hexdigest(), 16)  # 轉換為整數
         random.seed(seed)
         fortune = random.choice(list(fortune_levels.keys()))
         fortune_text = fortune_levels[fortune]
