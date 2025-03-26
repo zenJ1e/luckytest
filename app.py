@@ -30,8 +30,8 @@ def get_fortune():
         fortune = "大凶"
     else:
         today_date = datetime.today().strftime('%Y-%m-%d')
-        # 這裡使用查詢者的名字 + 當天日期確保每天的運勢固定
-        seed = hash(user_name + today_date)
+        # 使用查詢者的名字 + 查詢對象名字 + 當天日期來生成隨機數，保證每次查詢不同
+        seed = hash(queried_name + today_date)
         random.seed(seed)
         fortune = random.choice(list(fortune_levels.keys()))
 
