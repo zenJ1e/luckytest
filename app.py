@@ -28,15 +28,16 @@ def get_fortune():
     # 若包含 "綠茶的"，直接回傳 "大凶"
     if "綠茶的" in queried_name:
         fortune = "大凶"
+        fortune_text = fortune_levels[fortune]
     else:
         today_date = datetime.today().strftime('%Y-%m-%d')
         # 使用查詢者的名字 + 查詢對象名字 + 當天日期來生成隨機數，保證每次查詢不同
         seed = hash(queried_name + today_date)
         random.seed(seed)
         fortune = random.choice(list(fortune_levels.keys()))
+        fortune_text = fortune_levels[fortune]
 
-    fortune_text = fortune_levels[fortune]
-    
+    today_date = datetime.today().strftime('%Y-%m-%d')
     if queried_name == user_name:
         result_message = f"今天是 {today_date}， @{user_name} 的運勢是 <{fortune}>：{fortune_text}"
     else:
