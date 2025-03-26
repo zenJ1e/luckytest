@@ -1,9 +1,8 @@
-from flask import Flask, request
+from flask import Flask, request, Response
 import random
 import os
 from datetime import datetime
 from waitress import serve
-import json
 import hashlib
 
 app = Flask(__name__)
@@ -38,9 +37,13 @@ def get_fortune():
     else:
         # 讓運勢與使用者名字 + 當天日期綁定，確保一天內的結果固定
         today_date = datetime.today().strftime('%Y-%m-%d')
+
+        # ✅ 使用 hashlib 來產生固定但更均勻的隨機種子
         seed_str = queried_name + today_date
         seed = int(hashlib.md5(seed_str.encode()).hexdigest(), 16)  # 轉換為整數
         random.seed(seed)
+
+        # 取得隨機運勢
         fortune = random.choice(list(fortune_levels.keys()))
         fortune_text = fortune_levels[fortune]
 
@@ -51,8 +54,8 @@ def get_fortune():
     else:
         result_message = f"今天是 {today_date}， @{user_name} {queried_name} 的運勢是 <{fortune}>：{fortune_text}"
 
-    # 直接返回純文字訊息
-    return result_message
+    # ✅ 直接回傳「純文字」，確保 Nightbot 解析正確
+    return Response(result_message, mimetype="text/plain; charset=utf-8")
 
 # 使用 waitress 啟動伺服器
 if __name__ == '__main__':
