@@ -1,9 +1,8 @@
-from flask import Flask, request, Response
+from flask import Flask, request
 import random
 import os
 from datetime import datetime
 from waitress import serve
-import hashlib
 
 app = Flask(__name__)
 
@@ -20,44 +19,32 @@ fortune_levels = {
 
 @app.route('/fortune', methods=['GET'])
 def get_fortune():
-    # 取得發送者名稱（如果沒有提供名稱則使用預設值）
-    user_name = request.args.get('user', '未知使用者')
+    user_name = request.args.get('user', '未知使用者')  # 指令發送者
+    queried_name = request.args.get('name', None)  # 要查詢的人
 
-    # 取得查詢的名字，若未提供則使用發送者的名稱
-    queried_name = request.args.get('name', None)
+    if not queried_name:
+        queried_name = user_name  # 沒輸入時，就測自己
 
-    # 如果沒有提供查詢名字，就使用發送者的名字
-    if queried_name is None:
-        queried_name = user_name
-
-    # 檢查是否有包含關鍵字 "綠茶的"，若有則無條件回傳大凶
+    # 若包含 "綠茶的"，直接回傳 "大凶"
     if "綠茶的" in queried_name:
         fortune = "大凶"
-        fortune_text = fortune_levels[fortune]
     else:
-        # 讓運勢與使用者名字 + 當天日期綁定，確保一天內的結果固定
         today_date = datetime.today().strftime('%Y-%m-%d')
-
-        # ✅ 改用 hashlib.md5() 來產生隨機種子
-        seed_str = queried_name + today_date
-        seed = int(hashlib.md5(seed_str.encode()).hexdigest(), 16)  # 轉換為整數
+        # 這裡使用查詢者的名字 + 當天日期確保每天的運勢固定
+        seed = hash(user_name + today_date)
         random.seed(seed)
-
-        # 取得隨機運勢
         fortune = random.choice(list(fortune_levels.keys()))
-        fortune_text = fortune_levels[fortune]
 
-    # 讓運勢顯示結果
-    today_date = datetime.today().strftime('%Y-%m-%d')
+    fortune_text = fortune_levels[fortune]
+    
     if queried_name == user_name:
         result_message = f"今天是 {today_date}， @{user_name} 的運勢是 <{fortune}>：{fortune_text}"
     else:
         result_message = f"今天是 {today_date}， @{user_name} {queried_name} 的運勢是 <{fortune}>：{fortune_text}"
 
-    # ✅ 直接回傳「純文字」，確保 Nightbot 解析正確
-    return Response(result_message, mimetype="text/plain; charset=utf-8")
+    return result_message
 
-# 使用 waitress 啟動伺服器
+# 啟動 Flask 伺服器
 if __name__ == '__main__':
-    port = int(os.environ.get("PORT", 10000))  # 使用 Render 指定的 PORT
+    port = int(os.environ.get("PORT", 10000))
     serve(app, host='0.0.0.0', port=port)
