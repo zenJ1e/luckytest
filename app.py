@@ -7,7 +7,11 @@ from waitress import serve
 app = Flask(__name__)
 
 # 定義運勢結果
-fortune_levels = {
+fortune_levels = [
+    "大吉", "吉", "中吉", "小吉", "末吉", "凶", "大凶"
+]
+
+fortune_texts = {
     "大吉": "⭐⭐⭐⭐⭐。太帥啦麻吉！今天是你跟主播打倒黑大大的好日子！ greentea777",
     "吉": "⭐⭐⭐⭐。你好像有點幸運喔，路過彩券行就小買一張刮刮樂吧 greentea333",
     "中吉": "⭐⭐⭐。綠茶：唉呦，你中吉喔。中吉(不)一般喔 greentea555",
@@ -25,19 +29,20 @@ def get_fortune():
     if not queried_name:
         queried_name = user_name  # 沒輸入時，就測自己
 
-    # 若包含 "綠茶的"，直接回傳 "大凶"
+    today_date = datetime.today().strftime('%Y-%m-%d')
+
+    # 若包含 "綠茶的"，強制回傳 "大凶"
     if "綠茶的" in queried_name:
         fortune = "大凶"
-        fortune_text = fortune_levels[fortune]
     else:
-        today_date = datetime.today().strftime('%Y-%m-%d')
-        # 使用查詢者的名字 + 查詢對象名字 + 當天日期來生成隨機數，保證每次查詢不同
+        # 產生固定的哈希值，確保當天相同名字的結果一致
         seed = hash(queried_name + today_date)
-        random.seed(seed)
-        fortune = random.choice(list(fortune_levels.keys()))
-        fortune_text = fortune_levels[fortune]
+        index = seed % len(fortune_levels)  # 確保索引值落在 fortune_levels 陣列範圍內
+        fortune = fortune_levels[index]  # 取得該名字對應的運勢
 
-    today_date = datetime.today().strftime('%Y-%m-%d')
+    fortune_text = fortune_texts[fortune]
+
+    # 準備回應內容
     if queried_name == user_name:
         result_message = f"今天是 {today_date}， @{user_name} 的運勢是 <{fortune}>：{fortune_text}"
     else:
