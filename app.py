@@ -1,12 +1,13 @@
 from flask import Flask, request
 import random
 import os
+import hashlib
 from datetime import datetime
 from waitress import serve
 
 app = Flask(__name__)
 
-# 定義運勢結果
+# 運勢結果清單
 fortune_levels = [
     "大吉", "吉", "中吉", "小吉", "末吉", "凶", "大凶"
 ]
@@ -23,11 +24,11 @@ fortune_texts = {
 
 @app.route('/fortune', methods=['GET'])
 def get_fortune():
-    user_name = request.args.get('user', '未知使用者')  # 指令發送者
-    queried_name = request.args.get('name', None)  # 要查詢的人
+    user_id = request.args.get('user', 'unknown_id')  # 使用者的 Twitch ID
+    queried_name = request.args.get('name', None)  # 要查詢的人名
 
     if not queried_name:
-        queried_name = user_name  # 沒輸入時，就測自己
+        queried_name = user_id  # 沒輸入時，就測自己的運勢
 
     today_date = datetime.today().strftime('%Y-%m-%d')
 
@@ -35,18 +36,19 @@ def get_fortune():
     if "綠茶的" in queried_name:
         fortune = "大凶"
     else:
-        # 產生固定的哈希值，確保當天相同名字的結果一致
-        seed = hash(queried_name + today_date)
-        index = seed % len(fortune_levels)  # 確保索引值落在 fortune_levels 陣列範圍內
+        # 使用 hashlib 來產生固定的雜湊值
+        hash_input = f"{queried_name}_{today_date}".encode('utf-8')
+        hashed_value = hashlib.sha256(hash_input).hexdigest()  # 產生 SHA-256 雜湊
+        index = int(hashed_value, 16) % len(fortune_levels)  # 將雜湊轉為數字並取模
         fortune = fortune_levels[index]  # 取得該名字對應的運勢
 
     fortune_text = fortune_texts[fortune]
 
     # 準備回應內容
-    if queried_name == user_name:
-        result_message = f"今天是 {today_date}， @{user_name} 的運勢是 <{fortune}>：{fortune_text}"
+    if queried_name == user_id:
+        result_message = f"今天是 {today_date}， @{user_id} 的運勢是 <{fortune}>：{fortune_text}"
     else:
-        result_message = f"今天是 {today_date}， @{user_name} {queried_name} 的運勢是 <{fortune}>：{fortune_text}"
+        result_message = f"今天是 {today_date}， @{user_id} {queried_name} 的運勢是 <{fortune}>：{fortune_text}"
 
     return result_message
 
