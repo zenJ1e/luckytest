@@ -25,30 +25,34 @@ fortune_texts = {
 @app.route('/fortune', methods=['GET'])
 def get_fortune():
     user_id = request.args.get('user', 'unknown_id')  # 使用者的 Twitch ID
-    queried_name = request.args.get('name', None)  # 要查詢的人名
+    display_name = request.args.get('displayName', user_id)  # 嘗試拿顯示名稱（如果 Nightbot 有提供）
+    queried_name = request.args.get('name', None)  # 使用者輸入的查詢對象
 
-    if not queried_name:
-        queried_name = user_id  # 沒輸入時，就測自己的運勢
+    # **核心邏輯：確保自己測試自己時，也使用 display_name 作為種子**
+    if queried_name:
+        target_name = queried_name  # 如果有查詢別人，就用查詢的名字
+    else:
+        target_name = display_name  # 如果沒查詢，代表自己測自己，就用 displayName（如果沒提供，才用 user_id）
 
     today_date = datetime.today().strftime('%Y-%m-%d')
 
     # 若包含 "綠茶的"，強制回傳 "大凶"
-    if "綠茶的" in queried_name:
+    if "綠茶的" in target_name:
         fortune = "大凶"
     else:
         # 使用 hashlib 來產生固定的雜湊值
-        hash_input = f"{queried_name}_{today_date}".encode('utf-8')
+        hash_input = f"{target_name}_{today_date}".encode('utf-8')
         hashed_value = hashlib.sha256(hash_input).hexdigest()  # 產生 SHA-256 雜湊
-        index = int(hashed_value, 16) % len(fortune_levels)  # 將雜湊轉為數字並取模
-        fortune = fortune_levels[index]  # 取得該名字對應的運勢
+        index = int(hashed_value, 16) % len(fortune_levels)  # 取模來決定運勢
+        fortune = fortune_levels[index]
 
     fortune_text = fortune_texts[fortune]
 
-    # 準備回應內容
-    if queried_name == user_id:
-        result_message = f"今天是 {today_date}， @{user_id} 的運勢是 <{fortune}>：{fortune_text}"
-    else:
+    # **格式化輸出**
+    if queried_name:
         result_message = f"今天是 {today_date}， @{user_id} {queried_name} 的運勢是 <{fortune}>：{fortune_text}"
+    else:
+        result_message = f"今天是 {today_date}， @{user_id} ({display_name}) 的運勢是 <{fortune}>：{fortune_text}"
 
     return result_message
 
